@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\DriverEarning;
 use Illuminate\Http\Request;
 
 class DriverController extends Controller
@@ -55,6 +56,24 @@ class DriverController extends Controller
             'status'  => true,
             'message' => 'Order accepted successfully',
             'order'   => $order
+        ]);
+    }
+
+
+    // ✅ عرض سجل الأرباح
+    public function earnings(Request $request)
+    {
+        $driver = $request->user();
+
+        $earnings = DriverEarning::where('driver_id', $driver->id)
+            ->with('order')
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'total_earnings' => $earnings->sum('amount'),
+            'records' => $earnings
         ]);
     }
 }
