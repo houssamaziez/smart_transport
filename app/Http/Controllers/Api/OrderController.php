@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\DriverEarning;
+use App\Events\OrderCreated;
+use App\Events\OrderStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -46,6 +48,9 @@ class OrderController extends Controller
             'region'           => $request->user()->region,
             'customer_id'      => $request->user()->id,
         ]);
+
+        // ✅ Broadcast order created event to drivers in the same region
+        broadcast(new OrderCreated($order));
 
         return response()->json([
             'status'  => true,
@@ -142,10 +147,14 @@ class OrderController extends Controller
             ], 403);
         }
 
+        $oldStatus = $order->status;
         $order->update([
             'driver_id' => $request->user()->id,
             'status'    => 'accepted'
         ]);
+
+        // ✅ Broadcast order status update to customer
+        broadcast(new OrderStatusUpdated($order, $oldStatus, 'accepted'));
 
         return response()->json([
             'status'  => true,
@@ -173,10 +182,14 @@ class OrderController extends Controller
         }
 
         $newStatus = $request->status;
+        $oldStatus = $order->status;
 
         $order->update([
             'status' => $newStatus
         ]);
+
+        // ✅ Broadcast order status update to customer and driver
+        broadcast(new OrderStatusUpdated($order, $oldStatus, $newStatus));
 
         // ✅ عند اكتمال الطلب نسجل ربح للسائق
         if ($newStatus === 'completed') {
@@ -228,11 +241,37 @@ public function createScheduled(Request $request)
         'customer_id'      => $request->user()->id,
     ]);
 
+    // ✅ Broadcast scheduled order created event to drivers
+    broadcast(new OrderCreated($order));
+
     return response()->json([
         'status'  => true,
         'message' => 'Scheduled order created successfully!',
         'order'   => $order
     ], 201);
 }
+
+    // حذف طلب
+    public function remove($id, Request $request)
+    {
+        $order = Order::where('id', $id)
+            ->where('customer_id', $request->user()->id)
+            ->firstOrFail();
+
+        // يمكن حذف الطلب فقط إذا كان في حالة pending أو cancelled
+        if (!in_array($order->status, ['pending', 'cancelled'])) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Order cannot be deleted at this stage'
+            ], 400);
+        }
+
+        $order->delete();
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Order deleted successfully'
+        ]);
+    }
 
 }

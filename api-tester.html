@@ -1,0 +1,1107 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SmartTransport — API Tester (All Endpoints)</title>
+
+  <!-- Bootstrap 5 (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body { background:#f6f9fc; direction: rtl; }
+    pre.json { background:#0b1220; color:#e6eef6; padding:12px; border-radius:6px; white-space:pre-wrap; font-size:13px;}
+    .card-section { margin-bottom:14px; }
+    .small-muted { font-size:12px; color:#6c757d; }
+    .response-box { max-height:260px; overflow:auto; }
+    .endpoint-badge { font-size:12px; margin-left:6px; }
+    .required { color:#d63384; }
+    .log-entry { font-family:monospace; font-size:13px; margin-bottom:6px; }
+    .fill-sample { cursor:pointer; color:#0d6efd; text-decoration:underline; }
+  </style>
+</head>
+<body>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h3 class="mb-0">🚖 SmartTransport — API TESTER</h3>
+      <div class="small-muted">واجهة اختبار شاملة لجميع مسارات API — Auth / Customer / Driver / Station / Payments / Earnings / Support / Admin / Notifications</div>
+    </div>
+    <div class="text-end">
+      <div class="mb-1 small-muted">Base API</div>
+      <div class="input-group">
+        <input id="baseUrl" class="form-control form-control-sm" type="text" value="http://127.0.0.1:8000/api" />
+        <button id="saveBase" class="btn btn-sm btn-outline-primary">حفظ</button>
+      </div>
+      <div class="mt-2 text-end">
+        <button id="clearTokenBtn" class="btn btn-sm btn-outline-danger">مسح التوكن</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH TOKEN / INFO -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="d-flex gap-3 align-items-center">
+        <div>
+          <div class="small-muted">Current Token</div>
+          <textarea id="authToken" rows="2" class="form-control form-control-sm" placeholder="Bearer token سيظهر هنا تلقائياً"></textarea>
+        </div>
+        <div style="width:240px">
+          <div class="small-muted">Current User (JSON)</div>
+          <pre id="currentUser" class="json form-control form-control-sm" style="height:82px"></pre>
+        </div>
+        <div style="min-width:160px">
+          <div class="small-muted">Quick Actions</div>
+          <div class="d-grid gap-2">
+            <button id="btnCopyToken" class="btn btn-sm btn-outline-secondary">نسخ التوكن</button>
+            <button id="btnShowCurl" class="btn btn-sm btn-outline-secondary">توليد Curl Example</button>
+            <button id="btnScenario" class="btn btn-sm btn-success">تشغيل السيناريو التلقائي ▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT: using accordion sections -->
+  <div class="accordion" id="apiAccordion">
+
+    <!-- AUTH -->
+    <div class="accordion-item card-section">
+      <h2 class="accordion-header" id="headingAuth">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAuth">المصادقة / Auth</button>
+      </h2>
+      <div id="collapseAuth" class="accordion-collapse collapse" data-bs-parent="#apiAccordion">
+        <div class="accordion-body">
+          <div class="row gy-3">
+            <!-- Register -->
+            <div class="col-md-6">
+              <div class="card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <strong>Register</strong>
+                  <span class="endpoint-badge badge bg-primary">POST /auth/register</span>
+                </div>
+                <div class="small-muted mb-2">سجّل مستخدمًا جديدًا (customer/driver/station/admin)</div>
+                <div class="mb-2"><input id="reg_name" class="form-control form-control-sm" placeholder="الاسم" value="Ali 33 Customervv"></div>
+                <div class="mb-2"><input id="reg_email" class="form-control form-control-sm" placeholder="email@example.com" value="driver2@example.com"></div>
+                <div class="mb-2"><input id="reg_phone" class="form-control form-control-sm" placeholder="0551000000" value="05335122333"></div>
+                <div class="mb-2"><input id="reg_password" class="form-control form-control-sm" type="password" placeholder="password" value="123456"></div>
+                <div class="mb-2"><input id="reg_password_confirmation" class="form-control form-control-sm" type="password" placeholder="confirm password" value="123456"></div>
+                <div class="mb-2"><input id="reg_region" class="form-control form-control-sm" placeholder="region" value="Batna"></div>
+                <div class="mb-2">
+                  <select id="reg_role" class="form-select form-select-sm">
+                    <option value="customer">customer</option>
+                    <option value="driver" selected>driver</option>
+                    <option value="station">station</option>
+                    <option value="admin">admin</option>
+                  </select>
+                </div>
+                <div class="d-flex gap-2">
+                  <button id="btnRegister" class="btn btn-sm btn-primary">Register</button>
+                  <button id="fillRegSample" class="btn btn-sm btn-link">ملأ تلقائي</button>
+                </div>
+                <div class="mt-2 response-box"><pre id="respRegister" class="json"></pre></div>
+              </div>
+            </div>
+
+            <!-- Login -->
+            <div class="col-md-6">
+              <div class="card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <strong>Login</strong>
+                  <span class="endpoint-badge badge bg-primary">POST /auth/login</span>
+                </div>
+                <div class="small-muted mb-2">سجل الدخول لتحصل على token</div>
+                <div class="mb-2"><input id="login_email" class="form-control form-control-sm" placeholder="email@example.com"></div>
+                <div class="mb-2"><input id="login_password" class="form-control form-control-sm" type="password" placeholder="password"></div>
+                <div class="d-flex gap-2">
+                  <button id="btnLogin" class="btn btn-sm btn-success">Login</button>
+                  <button id="fillLoginSample" class="btn btn-sm btn-link">ملأ تلقائي</button>
+                </div>
+                <div class="mt-2 response-box"><pre id="respLogin" class="json"></pre></div>
+              </div>
+            </div>
+
+            <!-- Profile & Account -->
+            <div class="col-md-12">
+              <div class="card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <strong>Profile / Account</strong>
+                  <span class="endpoint-badge badge bg-primary">GET /auth/profile • POST /auth/update-profile</span>
+                </div>
+
+                <div class="row gx-3 gy-2">
+                  <div class="col-md-4">
+                    <button id="btnProfile" class="btn btn-sm btn-outline-primary w-100">Get Profile</button>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="d-flex gap-2">
+                      <input id="upd_name" class="form-control form-control-sm" placeholder="new name">
+                      <input id="upd_phone" class="form-control form-control-sm" placeholder="new phone">
+                      <input id="upd_region" class="form-control form-control-sm" placeholder="region (e.g. Batna)">
+                      <button id="btnUpdateProfile" class="btn btn-sm btn-outline-success">Update Profile</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row mt-2 gx-3">
+                  <div class="col-md-3"><input id="old_password" type="password" class="form-control form-control-sm" placeholder="old password"></div>
+                  <div class="col-md-3"><input id="new_password" type="password" class="form-control form-control-sm" placeholder="new password"></div>
+                  <div class="col-md-3"><input id="new_password_confirmation" type="password" class="form-control form-control-sm" placeholder="confirm"></div>
+                  <div class="col-md-3"><button id="btnChangePassword" class="btn btn-sm btn-warning w-100">Change Password</button></div>
+                </div>
+
+                <div class="row mt-2 gx-3">
+                  <div class="col-md-3"><button id="btnLogout" class="btn btn-sm btn-danger w-100">Logout</button></div>
+                  <div class="col-md-3"><button id="btnLogoutAll" class="btn btn-sm btn-danger w-100">Logout All</button></div>
+                </div>
+
+                <div class="mt-2 response-box"><pre id="respProfile" class="json"></pre></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CUSTOMER -->
+    <div class="accordion-item card-section">
+      <h2 class="accordion-header" id="headingCustomer">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCustomer">عميل — Customer</button>
+      </h2>
+      <div id="collapseCustomer" class="accordion-collapse collapse" data-bs-parent="#apiAccordion">
+        <div class="accordion-body">
+          <div class="row gy-3">
+            <!-- Create Order -->
+            <div class="col-md-6">
+              <div class="card p-3">
+                <div class="d-flex justify-content-between">
+                  <strong>إنشاء طلب فوري</strong>
+                  <span class="endpoint-badge badge bg-primary">POST /customer/orders</span>
+                </div>
+                <div class="small-muted mb-2">type = parcel أو ride</div>
+
+                <div class="mb-2"><select id="order_type" class="form-select form-select-sm">
+                  <option value="parcel">parcel</option>
+                  <option value="ride">ride</option>
+                </select></div>
+
+                <div class="mb-2"><input id="pickup_location" class="form-control form-control-sm" placeholder="pickup_location" value="Batna Center"></div>
+                <div class="mb-2"><input id="dropoff_location" class="form-control form-control-sm" placeholder="dropoff_location" value="Setif"></div>
+                <div class="mb-2"><input id="order_price" type="number" class="form-control form-control-sm" placeholder="price" value="800"></div>
+
+                <div id="parcelFields" style="display:none;">
+                  <div class="mb-2"><input id="package_type" class="form-control form-control-sm" placeholder="package_type (small|medium|large)"></div>
+                </div>
+
+                <div id="rideFields" style="display:block;">
+                  <div class="mb-2"><input id="passenger_count" type="number" class="form-control form-control-sm" placeholder="passenger_count" value="2"></div>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button id="btnCreateOrder" class="btn btn-sm btn-primary">Create Order</button>
+                  <button id="btnCreateRideSample" class="btn btn-sm btn-link">ملأ عينة</button>
+                </div>
+
+                <div class="mt-2 response-box"><pre id="respCreateOrder" class="json"></pre></div>
+              </div>
+            </div>
+
+            <!-- Create Scheduled -->
+            <div class="col-md-6">
+              <div class="card p-3">
+                <div class="d-flex justify-content-between">
+                  <strong>إنشاء طلب مجدول</strong>
+                  <span class="endpoint-badge badge bg-primary">POST /customer/orders/scheduled (NEW)</span>
+                </div>
+                <div class="small-muted mb-2">scheduled_at: YYYY-MM-DD HH:mm:ss</div>
+                <div class="mb-2"><input id="sched_type" class="form-control form-control-sm" placeholder="type (ride|parcel)" value="ride"></div>
+                <div class="mb-2"><input id="sched_pickup" class="form-control form-control-sm" placeholder="pickup_location" value="Algiers"></div>
+                <div class="mb-2"><input id="sched_dropoff" class="form-control form-control-sm" placeholder="dropoff_location" value="Setif"></div>
+                <div class="mb-2"><input id="sched_scheduled_at" class="form-control form-control-sm" placeholder="2025-09-15 10:00:00" value=""></div>
+                <div class="mb-2"><input id="sched_price" class="form-control form-control-sm" placeholder="price" value="1200"></div>
+                <div class="d-flex gap-2">
+                  <button id="btnCreateScheduled" class="btn btn-sm btn-primary">Create Scheduled</button>
+                  <button id="btnFillSchedNow" class="btn btn-sm btn-link">ملأ الآن</button>
+                </div>
+                <div class="mt-2 response-box"><pre id="respCreateSched" class="json"></pre></div>
+              </div>
+            </div>
+
+            <!-- Customer operations -->
+            <div class="col-md-12">
+              <div class="card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <strong>عمليات العميل</strong>
+                  <span class="endpoint-badge badge bg-primary">GET /customer/orders • GET /customer/orders/{id} • POST cancel/remove/rate</span>
+                </div>
+
+                <div class="row gx-2 gy-2">
+                  <div class="col-md-2"><button id="btnListMyOrders" class="btn btn-sm btn-outline-primary w-100">قائمة الطلبات</button></div>
+                  <div class="col-md-2"><input id="q_order_id" class="form-control form-control-sm" placeholder="Order ID"></div>
+                  <div class="col-md-2"><button id="btnShowOrder" class="btn btn-sm btn-outline-secondary w-100">تفاصيل</button></div>
+                  <div class="col-md-2"><button id="btnCancelOrder" class="btn btn-sm btn-outline-danger w-100">Cancel</button></div>
+                  <div class="col-md-2"><button id="btnRemoveOrder" class="btn btn-sm btn-outline-danger w-100">Remove</button></div>
+                  <div class="col-md-2"><button id="btnPrefillRate" class="btn btn-sm btn-outline-success w-100">Rate (Quick)</button></div>
+                </div>
+
+                <div class="row mt-2 gx-2">
+                  <div class="col-md-3"><input id="rate_rating" class="form-control form-control-sm" placeholder="rating (1..5)"></div>
+                  <div class="col-md-7"><input id="rate_comment" class="form-control form-control-sm" placeholder="comment"></div>
+                  <div class="col-md-2"><button id="btnRateOrder" class="btn btn-sm btn-success w-100">ارسال التقييم</button></div>
+                </div>
+
+                <div class="mt-2 response-box"><pre id="respCustomerOps" class="json"></pre></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DRIVER -->
+    <div class="accordion-item card-section">
+      <h2 class="accordion-header" id="headingDriver">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDriver">سائق — Driver</button>
+      </h2>
+      <div id="collapseDriver" class="accordion-collapse collapse" data-bs-parent="#apiAccordion">
+        <div class="accordion-body">
+          <div class="row gy-3">
+
+            <div class="col-md-6">
+              <div class="card p-3">
+                <div class="d-flex justify-content-between"><strong>طلبات متاحة</strong><span class="endpoint-badge badge bg-primary">GET /driver/orders</span></div>
+                <div class="mb-2 small-muted">يعرض الطلبات في نفس region</div>
+                <div class="d-flex gap-2">
+                  <button id="btnDriverAvailable" class="btn btn-sm btn-outline-primary">جلب الطلبات</button>
+                  <button id="btnDriverAcceptSample" class="btn btn-sm btn-link">تجربة قبول</button>
+                </div>
+                <div class="mt-2 response-box"><pre id="respDriverAvailable" class="json"></pre></div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card p-3">
+                <div class="d-flex justify-content-between"><strong>قبول / تحديث حالة</strong><span class="endpoint-badge badge bg-primary">POST /driver/orders/{id}/accept • /driver/orders/{id}/status</span></div>
+                <div class="row gx-2 gy-2 mt-1">
+                  <div class="col-md-3"><input id="drv_order_id" class="form-control form-control-sm" placeholder="order id"></div>
+                  <div class="col-md-3"><button id="btnAcceptOrder" class="btn btn-sm btn-primary w-100">قبول</button></div>
+                  <div class="col-md-3"><input id="drv_status" class="form-control form-control-sm" placeholder="status e.g. on_the_way"></div>
+                  <div class="col-md-3"><button id="btnUpdateOrderStatus" class="btn btn-sm btn-warning w-100">تحديث الحالة</button></div>
+                </div>
+
+                <hr />
+
+                <div class="small-muted">تحديث موقع السائق</div>
+                <div class="row gx-2 gy-2 mt-1">
+                  <div class="col-md-3"><input id="loc_lat" class="form-control form-control-sm" placeholder="lat" value="36.75"></div>
+                  <div class="col-md-3"><input id="loc_lng" class="form-control form-control-sm" placeholder="lng" value="3.06"></div>
+                  <div class="col-md-3"><button id="btnUpdateLocation" class="btn btn-sm btn-outline-success w-100">Update Location</button></div>
+                  <div class="col-md-3"><button id="btnDriverStatus" class="btn btn-sm btn-outline-secondary w-100">Update Driver Status</button></div>
+                </div>
+
+                <div class="mt-2 response-box"><pre id="respDriverOps" class="json"></pre></div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card p-3">
+                <div class="d-flex justify-content-between"><strong>طرود / طلبات قريبة / تقييمات / أرباح</strong><span class="endpoint-badge badge bg-primary">GET /driver/parcels • /driver/requests • /driver/ratings • /driver/earnings/history</span></div>
+                <div class="d-flex gap-2">
+                  <button id="btnDriverParcels" class="btn btn-sm btn-outline-primary">Parcels</button>
+                  <button id="btnDriverRequests" class="btn btn-sm btn-outline-primary">Nearby Requests</button>
+                  <button id="btnDriverRatings" class="btn btn-sm btn-outline-primary">Ratings</button>
+                  <button id="btnDriverEarnings" class="btn btn-sm btn-outline-primary">Earnings History</button>
+                </div>
+                <div class="mt-2 response-box"><pre id="respDriverExtra" class="json"></pre></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATION -->
+    <div class="accordion-item card-section">
+      <h2 class="accordion-header" id="headingStation">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStation">محطة — Station</button>
+      </h2>
+      <div id="collapseStation" class="accordion-collapse collapse" data-bs-parent="#apiAccordion">
+        <div class="accordion-body">
+          <div class="row gy-3">
+            <div class="col-md-6">
+              <div class="card p-3">
+                <strong>عرض الطرود</strong>
+                <div class="small-muted mb-2">GET /station/parcels</div>
+                <div class="d-flex gap-2">
+                  <button id="btnStationParcels" class="btn btn-sm btn-outline-primary">Get Parcels</button>
+                </div>
+                <div class="mt-2 response-box"><pre id="respStationParcels" class="json"></pre></div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card p-3">
+                <strong>تأكيد استلام / تعيين سائق</strong>
+                <div class="small-muted mb-2">POST /station/confirm • /station/assign-driver</div>
+                <div class="row gx-2 gy-2">
+                  <div class="col-md-4"><input id="st_parcel_id" class="form-control form-control-sm" placeholder="parcel_id"></div>
+                  <div class="col-md-4"><input id="st_driver_id" class="form-control form-control-sm" placeholder="driver_id"></div>
+                  <div class="col-md-4"><button id="btnConfirmParcel" class="btn btn-sm btn-primary w-100">Confirm</button></div>
+                  <div class="col-md-4 mt-2"><button id="btnAssignDriver" class="btn btn-sm btn-warning w-100">Assign Driver</button></div>
+                </div>
+                <div class="mt-2 response-box"><pre id="respStationOps" class="json"></pre></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div class="accordion-item card-section">
+      <h2 class="accordion-header" id="headingPayments">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePayments">المدفوعات — Payments</button>
+      </h2>
+      <div id="collapsePayments" class="accordion-collapse collapse" data-bs-parent="#apiAccordion">
+        <div class="accordion-body">
+          <div class="row gy-3">
+            <div class="col-md-6">
+              <div class="card p-3">
+                <strong>تسجيل دفعة</strong>
+                <div class="small-muted mb-2">POST /payments/record</div>
+                <div class="mb-2"><input id="pay_order_id" class="form-control form-control-sm" placeholder="order_id"></div>
+                <div class="mb-2"><input id="pay_amount" class="form-control form-control-sm" placeholder="amount" value="1500"></div>
+                <div class="mb-2"><select id="pay_method" class="form-select form-select-sm"><option value="cash">cash</option><option value="card">card</option></select></div>
+                <div class="d-grid gap-2"><button id="btnRecordPayment" class="btn btn-sm btn-primary">Record Payment</button></div>
+                <div class="mt-2 response-box"><pre id="respRecordPayment" class="json"></pre></div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card p-3">
+                <strong>استرجاع / سجل المدفوعات</strong>
+                <div class="small-muted mb-2">POST /payments/refund • GET /payments/history</div>
+                <div class="mb-2"><input id="refund_payment_id" class="form-control form-control-sm" placeholder="payment_id"></div>
+                <div class="d-grid gap-2">
+                  <button id="btnRefund" class="btn btn-sm btn-warning">Refund</button>
+                  <button id="btnPaymentHistory" class="btn btn-sm btn-outline-primary">Payment History</button>
+                </div>
+                <div class="mt-2 response-box"><pre id="respPaymentExtras" class="json"></pre></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EARNINGS -->
+    <div class="accordion-item card-section">
+      <h2 class="accordion-header" id="headingEarnings">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEarnings">أرباح — Earnings</button>
+      </h2>
+      <div id="collapseEarnings" class="accordion-collapse collapse" data-bs-parent="#apiAccordion">
+        <div class="accordion-body">
+          <div class="row gy-3">
+            <div class="col-md-4"><button id="btnEarningsList" class="btn btn-outline-primary w-100">GET /earnings</button></div>
+            <div class="col-md-4"><button id="btnEarningsSummary" class="btn btn-outline-primary w-100">GET /earnings/summary</button></div>
+            <div class="col-md-4"><button id="btnEarningsHistory" class="btn btn-outline-secondary w-100">Driver Earnings History (driver/earnings/history)</button></div>
+            <div class="col-md-12 mt-2"><div class="response-box"><pre id="respEarnings" class="json"></pre></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUPPORT -->
+    <div class="accordion-item card-section">
+      <h2 class="accordion-header" id="headingSupport">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSupport">الدعم — Support</button>
+      </h2>
+      <div id="collapseSupport" class="accordion-collapse collapse" data-bs-parent="#apiAccordion">
+        <div class="accordion-body">
+          <div class="row gy-3">
+            <div class="col-md-6">
+              <div class="card p-3">
+                <strong>فتح تذكرة</strong>
+                <div class="small-muted mb-2">POST /support/create</div>
+                <div class="mb-2"><input id="sup_subject" class="form-control form-control-sm" placeholder="subject"></div>
+                <div class="mb-2"><textarea id="sup_message" class="form-control form-control-sm" rows="3" placeholder="message"></textarea></div>
+                <button id="btnCreateTicket" class="btn btn-sm btn-primary">Create Ticket</button>
+                <div class="mt-2 response-box"><pre id="respSupportCreate" class="json"></pre></div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card p-3">
+                <strong>تذاكري / عرض تذكرة</strong>
+                <div class="small-muted mb-2">GET /support/my-tickets • GET /support/ticket/{id}</div>
+                <div class="d-flex gap-2">
+                  <button id="btnMyTickets" class="btn btn-sm btn-outline-primary">My Tickets</button>
+                  <input id="sup_ticket_id" class="form-control form-control-sm" placeholder="ticket id" />
+                  <button id="btnShowTicket" class="btn btn-sm btn-outline-secondary">Show</button>
+                </div>
+                <div class="mt-2 response-box"><pre id="respSupportList" class="json"></pre></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="accordion-item card-section">
+      <h2 class="accordion-header" id="headingAdmin">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdmin">مدير — Admin (جديد)</button>
+      </h2>
+      <div id="collapseAdmin" class="accordion-collapse collapse" data-bs-parent="#apiAccordion">
+        <div class="accordion-body">
+          <div class="d-flex gap-2 mb-2">
+            <button id="btnAdminUsers" class="btn btn-outline-primary">GET /admin/users</button>
+            <button id="btnAdminOrders" class="btn btn-outline-primary">GET /admin/orders</button>
+            <button id="btnAdminPayments" class="btn btn-outline-primary">GET /admin/payments</button>
+            <button id="btnAdminReports" class="btn btn-outline-secondary">GET /admin/reports</button>
+          </div>
+          <div class="d-flex gap-2 mb-2">
+            <input id="admin_ban_user_id" class="form-control form-control-sm" placeholder="user id to ban" />
+            <button id="btnAdminBan" class="btn btn-sm btn-warning">Ban User</button>
+          </div>
+          <div class="response-box"><pre id="respAdmin" class="json"></pre></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="accordion-item card-section">
+      <h2 class="accordion-header" id="headingNot">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNot">الإشعارات — Notifications (جديد)</button>
+      </h2>
+      <div id="collapseNot" class="accordion-collapse collapse" data-bs-parent="#apiAccordion">
+        <div class="accordion-body">
+          <div class="d-flex gap-2 mb-2">
+            <button id="btnNotifications" class="btn btn-outline-primary">GET /notifications</button>
+            <input id="notif_id" class="form-control form-control-sm" placeholder="notification id (comma separated)"/>
+            <button id="btnNotifMark" class="btn btn-sm btn-outline-success">علامة مقروء</button>
+          </div>
+          <div class="response-box"><pre id="respNotifs" class="json"></pre></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Logs -->
+  <div class="card mt-4">
+    <div class="card-body">
+      <h6>Logs / Console</h6>
+      <div id="logArea" style="height:200px; overflow:auto; background:#0f1723; color:#cfe8ff; padding:10px; border-radius:6px;"></div>
+      <div class="mt-2 d-flex gap-2">
+        <button id="btnClearLog" class="btn btn-sm btn-outline-secondary">Clear Log</button>
+        <button id="btnDownloadLog" class="btn btn-sm btn-outline-primary">Download Log</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center my-4 small-muted">صفحة التجارب هذه مخصصة للاختبار المحلي. تأكد من إعداد CORS و تشغيل خادم Laravel.</div>
+
+</div>
+
+<!-- Bootstrap JS (bundle) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+/*
+  SmartTransport API Tester
+  - Comprehensive single-page tester for all endpoints described in routes/api.php
+  - Store token in localStorage as 'st_token' and user JSON as 'st_user'
+  - Author: Generated for you with detailed comments
+*/
+
+// -------------------- Utilities --------------------
+const lsTokenKey = 'st_token';
+const lsUserKey = 'st_user';
+
+// helper: log
+function log(msg, cls='') {
+  const area = document.getElementById('logArea');
+  const el = document.createElement('div');
+  el.className = 'log-entry ' + cls;
+  el.textContent = new Date().toLocaleTimeString() + '  —  ' + msg;
+  area.prepend(el);
+}
+
+// pretty JSON
+function pretty(obj) {
+  try {
+    if (typeof obj === 'string') {
+      try { return JSON.stringify(JSON.parse(obj), null, 2); } catch(e) { return obj; }
+    }
+    return JSON.stringify(obj, null, 2);
+  } catch (e) { return String(obj); }
+}
+
+// show response in target pre element
+async function showResponse(targetId, response) {
+  const el = document.getElementById(targetId);
+  if (!response) { el.textContent = ''; return; }
+  if (response instanceof Response) {
+    let text;
+    try {
+      text = await response.text();
+      // try parse json
+      try { el.textContent = JSON.stringify(JSON.parse(text), null, 2); }
+      catch(e) { el.textContent = text; }
+    } catch(e) {
+      el.textContent = 'No content or failed to read response';
+    }
+    log(`[${response.status}] ${response.url}`);
+  } else {
+    el.textContent = pretty(response);
+    log('Displayed JSON in ' + targetId);
+  }
+}
+
+// get baseUrl
+function getBaseUrl() {
+  return document.getElementById('baseUrl').value.replace(/\/+$/, '');
+}
+
+// set token in UI and localStorage
+function setToken(token) {
+  if (token) {
+    localStorage.setItem(lsTokenKey, token);
+    document.getElementById('authToken').value = token;
+    log('Token saved to localStorage');
+  } else {
+    localStorage.removeItem(lsTokenKey);
+    document.getElementById('authToken').value = '';
+    log('Token cleared');
+  }
+}
+
+// save current user JSON
+function setUser(userObj) {
+  if (userObj) {
+    localStorage.setItem(lsUserKey, JSON.stringify(userObj));
+    document.getElementById('currentUser').textContent = pretty(userObj);
+  } else {
+    localStorage.removeItem(lsUserKey);
+    document.getElementById('currentUser').textContent = '';
+  }
+}
+
+// get token
+function getToken() {
+  const v = document.getElementById('authToken').value || localStorage.getItem(lsTokenKey);
+  return v || '';
+}
+
+// call API helper
+async function apiRequest(method, path, body=null, opts={}) {
+  const url = getBaseUrl() + path;
+  const headers = Object.assign({}, opts.headers || {});
+  if (!headers['Content-Type']) headers['Content-Type'] = 'application/json';
+  const token = getToken();
+  if (token) headers['Authorization'] = 'Bearer ' + token.replace(/^Bearer\s*/i, '');
+  const init = { method, headers };
+  if (body !== null) {
+    // if body is FormData skip JSON stringify
+    if (body instanceof FormData) {
+      delete headers['Content-Type'];
+      init.body = body;
+    } else {
+      init.body = JSON.stringify(body);
+    }
+  }
+  let res;
+  try {
+    res = await fetch(url, init);
+  } catch (err) {
+    log('Network error: ' + err.message, 'text-danger');
+    throw err;
+  }
+  return res;
+}
+
+// small helper to read json if possible
+async function readJsonSafe(res) {
+  try {
+    const txt = await res.text();
+    try { return JSON.parse(txt); } catch (e) { return txt; }
+  } catch (e) {
+    return null;
+  }
+}
+
+// init UI with stored token
+window.addEventListener('load', () => {
+  const token = localStorage.getItem(lsTokenKey);
+  if (token) document.getElementById('authToken').value = token;
+  const user = localStorage.getItem(lsUserKey);
+  if (user) try { document.getElementById('currentUser').textContent = pretty(JSON.parse(user)); } catch(e){}
+});
+
+// -------------------- Button Handlers: Auth --------------------
+document.getElementById('saveBase').addEventListener('click', () => {
+  const v = document.getElementById('baseUrl').value;
+  localStorage.setItem('st_baseurl', v);
+  log('Base URL saved: ' + v);
+});
+document.getElementById('clearTokenBtn').addEventListener('click', () => {
+  setToken(null); setUser(null); log('Cleared token and user');
+});
+document.getElementById('btnCopyToken').addEventListener('click', async () => {
+  const token = getToken();
+  if (!token) return alert('No token to copy');
+  try { await navigator.clipboard.writeText(token); alert('Token copied'); } catch(e){ alert('Copy failed'); }
+});
+document.getElementById('btnShowCurl').addEventListener('click', () => {
+  const base = getBaseUrl();
+  const curl = `curl -X GET "${base}/auth/profile" -H "Authorization: Bearer <TOKEN>" -H "Content-Type: application/json"`;
+  prompt('cURL example', curl);
+});
+
+// Register
+document.getElementById('fillRegSample').addEventListener('click', () => {
+  document.getElementById('reg_name').value = 'Ali 33 Customervv';
+  document.getElementById('reg_email').value = 'driver2@example.com';
+  document.getElementById('reg_phone').value = '05335122333';
+  document.getElementById('reg_password').value = '123456';
+  document.getElementById('reg_password_confirmation').value = '123456';
+  document.getElementById('reg_region').value = 'Batna';
+  document.getElementById('reg_role').value = 'driver';
+});
+document.getElementById('btnRegister').addEventListener('click', async () => {
+  const payload = {
+    name: document.getElementById('reg_name').value,
+    email: document.getElementById('reg_email').value,
+    phone: document.getElementById('reg_phone').value,
+    password: document.getElementById('reg_password').value,
+    password_confirmation: document.getElementById('reg_password_confirmation').value,
+    region: document.getElementById('reg_region').value,
+    role: document.getElementById('reg_role').value
+  };
+  const res = await apiRequest('POST', '/auth/register', payload);
+  const data = await readJsonSafe(res);
+  showResponse('respRegister', res);
+  if (res.ok && data.token) {
+    setToken(data.token);
+    setUser(data.user || null);
+  }
+});
+
+// Login
+document.getElementById('fillLoginSample').addEventListener('click', () => {
+  document.getElementById('login_email').value = document.getElementById('reg_email').value || 'demo@example.com';
+  document.getElementById('login_password').value = document.getElementById('reg_password').value || 'password123';
+});
+document.getElementById('btnLogin').addEventListener('click', async () => {
+  const payload = { email: document.getElementById('login_email').value, password: document.getElementById('login_password').value };
+  const res = await apiRequest('POST', '/auth/login', payload);
+  const data = await readJsonSafe(res);
+  showResponse('respLogin', res);
+  if (res.ok && data.token) {
+    setToken(data.token);
+    setUser(data.user || null);
+  } else if (res.ok && data.token === undefined && data.access_token) {
+    // fallback for other formats
+    setToken(data.access_token);
+  }
+});
+
+// Profile
+document.getElementById('btnProfile').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/auth/profile');
+  const data = await readJsonSafe(res);
+  showResponse('respProfile', res);
+  if (res.ok && data.user) { setUser(data.user); } else if (res.ok && data.id) { setUser(data); }
+});
+
+// Update Profile
+document.getElementById('btnUpdateProfile').addEventListener('click', async () => {
+  const payload = {
+    name: document.getElementById('upd_name').value || undefined,
+    phone: document.getElementById('upd_phone').value || undefined,
+    region: document.getElementById('upd_region').value || undefined
+  };
+  // remove undefined keys
+  Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
+  const res = await apiRequest('POST', '/auth/update-profile', payload);
+  showResponse('respProfile', res);
+  const data = await readJsonSafe(res);
+  if (res.ok && data.user) setUser(data.user);
+});
+
+// Change Password
+document.getElementById('btnChangePassword').addEventListener('click', async () => {
+  const payload = { old_password: document.getElementById('old_password').value, password: document.getElementById('new_password').value, password_confirmation: document.getElementById('new_password_confirmation').value };
+  const res = await apiRequest('POST', '/auth/change-password', payload);
+  showResponse('respProfile', res);
+});
+
+// Logout / Logout All
+document.getElementById('btnLogout').addEventListener('click', async () => {
+  const res = await apiRequest('POST', '/auth/logout', {});
+  showResponse('respProfile', res);
+  if (res.ok) { setToken(null); setUser(null); }
+});
+document.getElementById('btnLogoutAll').addEventListener('click', async () => {
+  const res = await apiRequest('POST', '/auth/logout-all', {});
+  showResponse('respProfile', res);
+  if (res.ok) { setToken(null); setUser(null); }
+});
+
+// -------------------- Customer Handlers --------------------
+
+// switch input visibility based on type
+document.getElementById('order_type').addEventListener('change', (e) => {
+  const t = e.target.value;
+  document.getElementById('parcelFields').style.display = t === 'parcel' ? 'block' : 'none';
+  document.getElementById('rideFields').style.display = t === 'ride' ? 'block' : 'none';
+});
+
+// create order
+document.getElementById('btnCreateOrder').addEventListener('click', async () => {
+  const type = document.getElementById('order_type').value;
+  const payload = {
+    type,
+    pickup_location: document.getElementById('pickup_location').value,
+    dropoff_location: document.getElementById('dropoff_location').value,
+    price: Number(document.getElementById('order_price').value)
+  };
+  if (type === 'parcel') payload.package_type = document.getElementById('package_type').value || 'small';
+  if (type === 'ride') payload.passenger_count = Number(document.getElementById('passenger_count').value) || 1;
+  const res = await apiRequest('POST', '/customer/orders', payload);
+  showResponse('respCreateOrder', res);
+});
+
+// create scheduled
+document.getElementById('btnFillSchedNow').addEventListener('click', () => {
+  const dt = new Date(Date.now() + 60*60*1000);
+  const iso = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0') + ' ' + String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ':00';
+  document.getElementById('sched_scheduled_at').value = iso;
+});
+document.getElementById('btnCreateScheduled').addEventListener('click', async () => {
+  const payload = {
+    type: document.getElementById('sched_type').value || 'ride',
+    pickup_location: document.getElementById('sched_pickup').value,
+    dropoff_location: document.getElementById('sched_dropoff').value,
+    scheduled_at: document.getElementById('sched_scheduled_at').value,
+    price: Number(document.getElementById('sched_price').value)
+  };
+  if (payload.type === 'ride') payload.passenger_count = 1;
+  const res = await apiRequest('POST', '/customer/orders/scheduled', payload);
+  showResponse('respCreateSched', res);
+});
+
+// customer ops: list, show, cancel, remove, rate
+document.getElementById('btnListMyOrders').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/customer/orders');
+  showResponse('respCustomerOps', res);
+});
+document.getElementById('btnShowOrder').addEventListener('click', async () => {
+  const id = document.getElementById('q_order_id').value;
+  if (!id) return alert('Enter order id');
+  const res = await apiRequest('GET', '/customer/orders/' + id);
+  showResponse('respCustomerOps', res);
+});
+document.getElementById('btnCancelOrder').addEventListener('click', async () => {
+  const id = document.getElementById('q_order_id').value;
+  if (!id) return alert('Enter order id');
+  const res = await apiRequest('POST', '/customer/orders/' + id + '/cancel', { reason: 'cancelled from UI' });
+  showResponse('respCustomerOps', res);
+});
+document.getElementById('btnRemoveOrder').addEventListener('click', async () => {
+  const id = document.getElementById('q_order_id').value;
+  if (!id) return alert('Enter order id');
+  const res = await apiRequest('POST', '/customer/orders/' + id + '/remove', {});
+  showResponse('respCustomerOps', res);
+});
+document.getElementById('btnPrefillRate').addEventListener('click', () => {
+  document.getElementById('rate_rating').value = 5;
+  document.getElementById('rate_comment').value = 'Great trip!';
+});
+document.getElementById('btnRateOrder').addEventListener('click', async () => {
+  const id = document.getElementById('q_order_id').value;
+  if (!id) return alert('Enter order id');
+  const payload = { rating: Number(document.getElementById('rate_rating').value) || 5, comment: document.getElementById('rate_comment').value || '' };
+  const res = await apiRequest('POST', '/customer/orders/' + id + '/rate', payload);
+  showResponse('respCustomerOps', res);
+});
+
+// -------------------- Driver Handlers --------------------
+document.getElementById('btnDriverAvailable').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/driver/orders');
+  showResponse('respDriverAvailable', res);
+});
+document.getElementById('btnAcceptOrder').addEventListener('click', async () => {
+  const id = document.getElementById('drv_order_id').value;
+  if (!id) return alert('Order ID required');
+  const res = await apiRequest('POST', '/driver/orders/' + id + '/accept', {});
+  showResponse('respDriverOps', res);
+});
+document.getElementById('btnUpdateOrderStatus').addEventListener('click', async () => {
+  const id = document.getElementById('drv_order_id').value;
+  const status = document.getElementById('drv_status').value;
+  if (!id || !status) return alert('Provide order id and status');
+  const res = await apiRequest('POST', '/driver/orders/' + id + '/status', { status });
+  showResponse('respDriverOps', res);
+});
+document.getElementById('btnUpdateLocation').addEventListener('click', async () => {
+  const lat = Number(document.getElementById('loc_lat').value), lng = Number(document.getElementById('loc_lng').value);
+  const res = await apiRequest('POST', '/driver/location/update', { lat, lng });
+  showResponse('respDriverOps', res);
+});
+document.getElementById('btnDriverParcels').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/driver/parcels');
+  showResponse('respDriverExtra', res);
+});
+document.getElementById('btnDriverRequests').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/driver/requests');
+  showResponse('respDriverExtra', res);
+});
+document.getElementById('btnDriverRatings').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/driver/ratings');
+  showResponse('respDriverExtra', res);
+});
+document.getElementById('btnDriverEarnings').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/driver/earnings/history');
+  showResponse('respDriverExtra', res);
+});
+document.getElementById('btnDriverStatus').addEventListener('click', async () => {
+  const res = await apiRequest('POST', '/driver/update-status', { status: 'available' });
+  showResponse('respDriverOps', res);
+});
+
+// -------------------- Station --------------------
+document.getElementById('btnStationParcels').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/station/parcels');
+  showResponse('respStationParcels', res);
+});
+document.getElementById('btnConfirmParcel').addEventListener('click', async () => {
+  const parcel_id = document.getElementById('st_parcel_id').value;
+  if (!parcel_id) return alert('parcel_id required');
+  const res = await apiRequest('POST', '/station/confirm', { parcel_id, status: 'received' });
+  showResponse('respStationOps', res);
+});
+document.getElementById('btnAssignDriver').addEventListener('click', async () => {
+  const parcel_id = document.getElementById('st_parcel_id').value;
+  const driver_id = document.getElementById('st_driver_id').value;
+  if (!parcel_id || !driver_id) return alert('parcel and driver ids required');
+  const res = await apiRequest('POST', '/station/assign-driver', { parcel_id, driver_id });
+  showResponse('respStationOps', res);
+});
+
+// -------------------- Payments --------------------
+document.getElementById('btnRecordPayment').addEventListener('click', async () => {
+  const payload = { order_id: Number(document.getElementById('pay_order_id').value), amount: Number(document.getElementById('pay_amount').value), method: document.getElementById('pay_method').value };
+  const res = await apiRequest('POST', '/payments/record', payload);
+  showResponse('respRecordPayment', res);
+});
+document.getElementById('btnRefund').addEventListener('click', async () => {
+  const id = document.getElementById('refund_payment_id').value;
+  if (!id) return alert('payment_id required');
+  const res = await apiRequest('POST', '/payments/refund', { payment_id: id, reason: 'Refund requested from UI' });
+  showResponse('respPaymentExtras', res);
+});
+document.getElementById('btnPaymentHistory').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/payments/history');
+  showResponse('respPaymentExtras', res);
+});
+
+// -------------------- Earnings --------------------
+document.getElementById('btnEarningsList').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/earnings');
+  showResponse('respEarnings', res);
+});
+document.getElementById('btnEarningsSummary').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/earnings/summary');
+  showResponse('respEarnings', res);
+});
+document.getElementById('btnEarningsHistory').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/driver/earnings/history');
+  showResponse('respEarnings', res);
+});
+
+// -------------------- Support --------------------
+document.getElementById('btnCreateTicket').addEventListener('click', async () => {
+  const payload = { subject: document.getElementById('sup_subject').value, message: document.getElementById('sup_message').value };
+  const res = await apiRequest('POST', '/support/create', payload);
+  showResponse('respSupportCreate', res);
+});
+document.getElementById('btnMyTickets').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/support/my-tickets');
+  showResponse('respSupportList', res);
+});
+document.getElementById('btnShowTicket').addEventListener('click', async () => {
+  const id = document.getElementById('sup_ticket_id').value; if (!id) return alert('ticket id required');
+  const res = await apiRequest('GET', '/support/ticket/' + id);
+  showResponse('respSupportList', res);
+});
+
+// -------------------- Admin --------------------
+document.getElementById('btnAdminUsers').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/admin/users');
+  showResponse('respAdmin', res);
+});
+document.getElementById('btnAdminOrders').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/admin/orders');
+  showResponse('respAdmin', res);
+});
+document.getElementById('btnAdminPayments').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/admin/payments');
+  showResponse('respAdmin', res);
+});
+document.getElementById('btnAdminReports').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/admin/reports');
+  showResponse('respAdmin', res);
+});
+document.getElementById('btnAdminBan').addEventListener('click', async () => {
+  const id = document.getElementById('admin_ban_user_id').value; if (!id) return alert('user id required');
+  const res = await apiRequest('POST', '/admin/users/' + id + '/ban', { reason: 'Violation' });
+  showResponse('respAdmin', res);
+});
+
+// -------------------- Notifications --------------------
+document.getElementById('btnNotifications').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/notifications');
+  showResponse('respNotifs', res);
+});
+document.getElementById('btnNotifMark').addEventListener('click', async () => {
+  const ids = document.getElementById('notif_id').value;
+  if (!ids) return alert('notification ids required');
+  const payload = { notification_id: ids.split(',').map(s => s.trim()) };
+  const res = await apiRequest('POST', '/notifications/mark-read', payload);
+  showResponse('respNotifs', res);
+});
+
+// -------------------- Logs controls --------------------
+document.getElementById('btnClearLog').addEventListener('click', () => {
+  document.getElementById('logArea').innerHTML = '';
+});
+document.getElementById('btnDownloadLog').addEventListener('click', () => {
+  const txt = document.getElementById('logArea').innerText;
+  const blob = new Blob([txt], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'api-tester-log.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// -------------------- Scenario Runner (auto test) --------------------
+document.getElementById('btnScenario').addEventListener('click', async () => {
+  if (!confirm('سيناريو تجريبي: سينشئ حساب عميل وحساب سائق، يضبط المناطق، ينشئ طلب، ويقبل السائق الطلب ويحدث الحالة. هل تريد المتابعة؟')) return;
+  try {
+    // 1) Register Customer
+    const custEmail = `cust_${Date.now().toString().slice(-5)}@example.com`;
+    const custPass = 'secret123';
+    const resRegCust = await apiRequest('POST', '/auth/register', { name: 'AutoCustomer', email: custEmail, phone: '0551' + Math.floor(Math.random()*9000+1000), password: custPass, password_confirmation: custPass, role: 'customer' });
+    const regCustData = await readJsonSafe(resRegCust);
+    showResponse('respRegister', resRegCust);
+    if (!resRegCust.ok) { alert('Register customer failed'); return; }
+    const custToken = regCustData.token;
+    // store token temporarily as 'cust'
+    const tokenBefore = getToken();
+    setToken(custToken);
+    log('Customer token set (scenario)');
+
+    // 2) Set region for customer (update-profile)
+    await apiRequest('POST', '/auth/update-profile', { region: 'Batna', name: 'AutoCustomer' });
+
+    // 3) Create Order as customer
+    const resOrder = await apiRequest('POST', '/customer/orders', { type: 'ride', pickup_location: 'Batna center', dropoff_location: 'Batna south', price: 800, passenger_count: 2 });
+    const orderData = await readJsonSafe(resOrder);
+    showResponse('respCreateOrder', resOrder);
+    if (!resOrder.ok) { alert('Create order failed'); setToken(tokenBefore); return; }
+    const orderId = orderData.order?.id ?? orderData.id ?? null;
+    log('Order created id=' + orderId);
+
+    // 4) Register Driver
+    const drvEmail = `drv_${Date.now().toString().slice(-5)}@example.com`;
+    const drvPass = 'secret123';
+    const resRegDrv = await apiRequest('POST', '/auth/register', { name: 'AutoDriver', email: drvEmail, phone: '0551' + Math.floor(Math.random()*9000+1000), password: drvPass, password_confirmation: drvPass, role: 'driver' });
+    const regDrvData = await readJsonSafe(resRegDrv);
+    showResponse('respRegister', resRegDrv);
+    if (!resRegDrv.ok) { alert('Register driver failed'); setToken(tokenBefore); return; }
+    const drvToken = regDrvData.token;
+
+    // login driver & set region to match customer
+    setToken(drvToken);
+    await apiRequest('POST', '/auth/update-profile', { region: 'Batna', name: 'AutoDriver' });
+
+    // 5) Driver lists available orders
+    const resAvail = await apiRequest('GET', '/driver/orders');
+    showResponse('respDriverAvailable', resAvail);
+    const availData = await readJsonSafe(resAvail);
+
+    // 6) Driver accept the created order (if present) else accept by id
+    const acceptId = orderId || (availData.orders && availData.orders[0] && availData.orders[0].id);
+    if (!acceptId) { alert('No available order to accept'); setToken(tokenBefore); return; }
+    const resAccept = await apiRequest('POST', '/driver/orders/' + acceptId + '/accept', {});
+    showResponse('respDriverOps', resAccept);
+
+    // 7) Update status to on_the_way -> picked_up -> completed
+    await new Promise(r => setTimeout(r, 800));
+    await apiRequest('POST', '/driver/orders/' + acceptId + '/status', { status: 'on_the_way' });
+    await new Promise(r => setTimeout(r, 600));
+    await apiRequest('POST', '/driver/orders/' + acceptId + '/status', { status: 'picked_up' });
+    await new Promise(r => setTimeout(r, 600));
+    const resComplete = await apiRequest('POST', '/driver/orders/' + acceptId + '/status', { status: 'completed' });
+    showResponse('respDriverOps', resComplete);
+
+    // 8) switch back to customer token and rate
+    setToken(custToken);
+    const resRate = await apiRequest('POST', '/customer/orders/' + acceptId + '/rate', { rating: 5, comment: 'Auto scenario - great' });
+    showResponse('respCustomerOps', resRate);
+
+    alert('Scenario finished (check responses)');
+    // restore previous token to avoid surprising user
+    setToken(tokenBefore);
+  } catch (e) {
+    console.error(e);
+    alert('Scenario failed: ' + (e.message || e));
+  }
+});
+
+// -------------------- Admin / Notifications helpers --------------------
+document.getElementById('btnNotifications').addEventListener('click', async () => {
+  const res = await apiRequest('GET', '/notifications');
+  showResponse('respNotifs', res);
+});
+
+// -------------------- Initialization small helpers --------------------
+document.getElementById('btnDriverAcceptSample').addEventListener('click', async () => {
+  const confirmId = prompt('Enter order id to accept (or leave empty to pick first available):');
+  if (confirmId) {
+    document.getElementById('drv_order_id').value = confirmId;
+    document.getElementById('btnAcceptOrder').click();
+  } else {
+    document.getElementById('btnDriverAvailable').click();
+  }
+});
+
+// optional: when user edits authToken area manual save it
+document.getElementById('authToken').addEventListener('change', (e) => {
+  const v = e.target.value.trim();
+  if (v) localStorage.setItem(lsTokenKey, v);
+  else localStorage.removeItem(lsTokenKey);
+});
+
+// On page load: fill base url if saved
+window.addEventListener('load', () => {
+  const baseSaved = localStorage.getItem('st_baseurl');
+  if (baseSaved) document.getElementById('baseUrl').value = baseSaved;
+});
+
+</script>
+
+</body>
+</html>
