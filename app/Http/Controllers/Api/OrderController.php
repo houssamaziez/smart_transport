@@ -17,47 +17,57 @@ class OrderController extends Controller
     // ==============================
 
     // إنشاء طلب جديد
-    public function createAsCustomer(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'type'             => 'required|in:parcel,ride',
-            'pickup_location'  => 'required|string|max:255',
-            'dropoff_location' => 'required|string|max:255',
-            'price'            => 'required|numeric|min:1',
-            // parcel only
-            'package_type'     => 'required_if:type,parcel',
-            // ride only
-            'passenger_count'  => 'required_if:type,ride|integer|min:1',
-        ]);
+  public function createAsCustomer(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'type'             => 'required|in:parcel,ride',
+        'pickup_address'   => 'required|string|max:255',
+        'dropoff_address'  => 'required|string|max:255',
+        'price'            => 'required|numeric|min:1',
+        'car_type'         => 'required|in:economy,comfort,luxury,family',
+        'payment_method'   => 'required|in:cash,card,wallet',
+        'notes'            => 'nullable|string|max:500',
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        // parcel only
+        'parcel_description' => 'required_if:type,parcel|string|max:255',
+        'parcel_weight'      => 'required_if:type,parcel|numeric|min:0.1',
 
-        $order = Order::create([
-            'type'             => $request->type,
-            'pickup_location'  => $request->pickup_location,
-            'dropoff_location' => $request->dropoff_location,
-            'price'            => $request->price,
-            'package_type'     => $request->package_type,
-            'passenger_count'  => $request->passenger_count,
-            'status'           => 'pending',
-            'region'           => $request->user()->region,
-            'customer_id'      => $request->user()->id,
-        ]);
+        // ride only (لو عايز تضيف عدد الركاب لازم تضيف عمود بـ migration)
+        // 'passenger_count'  => 'required_if:type,ride|integer|min:1',
+    ]);
 
-        // ✅ Broadcast order created event to drivers in the same region
-        broadcast(new OrderCreated($order));
-
+    if ($validator->fails()) {
         return response()->json([
-            'status'  => true,
-            'message' => 'Order created successfully!',
-            'order'   => $order
-        ], 201);
+            'status' => false,
+            'errors' => $validator->errors()
+        ], 422);
     }
+
+    $order = Order::create([
+        'type'               => $request->type,
+        'pickup_address'     => $request->pickup_address,
+        'dropoff_address'    => $request->dropoff_address,
+        'price'              => $request->price,
+        'parcel_description' => $request->parcel_description,
+        'parcel_weight'      => $request->parcel_weight,
+        'car_type'           => $request->car_type,
+        'payment_method'     => $request->payment_method,
+        'notes'              => $request->notes,
+        'status'             => 'pending',
+        'scheduled_at'       => $request->scheduled_at, // ممكن يبقى nullable
+        'region'             => $request->user()->region,
+        'customer_id'        => $request->user()->id,
+    ]);
+
+    // ✅ Broadcast order created event to drivers in the same region
+    broadcast(new OrderCreated($order));
+
+    return response()->json([
+        'status'  => true,
+        'message' => 'Order created successfully!',
+        'order'   => $order
+    ], 201);
+}
 
     // جلب طلبات العميل
     public function listForCustomer(Request $request)

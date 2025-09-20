@@ -8,13 +8,15 @@ class Order extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'customer_id','driver_id','station_id','type',
-        'pickup_address','pickup_lat','pickup_lng',
-        'dropoff_address','dropoff_lat','dropoff_lng',
-        'parcel_description','parcel_weight','distance','duration','price',
-        'payment_status','status','meta', 'region'
-    ];
+   protected $fillable = [
+    'customer_id','driver_id','station_id','type',
+    'pickup_address','pickup_lat','pickup_lng',
+    'dropoff_address','dropoff_lat','dropoff_lng',
+    'parcel_description','parcel_weight','distance','duration','price',
+    'payment_status','status','meta','region',
+    'car_type','payment_method','notes','scheduled_at'
+];
+
 
     protected $casts = [
         'meta' => 'array',

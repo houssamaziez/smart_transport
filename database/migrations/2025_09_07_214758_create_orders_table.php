@@ -40,6 +40,12 @@ return new class extends Migration
 
             $table->decimal('price',10,2)->default(0);
 
+            // ✅ new fields
+            $table->enum('car_type', ['economy','comfort','luxury','family'])->nullable();
+            $table->enum('payment_method', ['cash','card','wallet'])->default('cash');
+            $table->text('notes')->nullable();
+            $table->timestamp('scheduled_at')->nullable();
+
             $table->enum('payment_status',['pending','paid'])->default('pending');
 
             $table->enum('status',[
@@ -50,6 +56,7 @@ return new class extends Migration
             $table->timestamps();
         });
     }
+
     public function down(): void
     {
         Schema::dropIfExists('orders');
