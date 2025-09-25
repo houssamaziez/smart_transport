@@ -22,6 +22,7 @@
  */
 
 use Illuminate\Support\Facades\Route;
+use App\Events\OrderUpdated;
 
 // ======= Controllers =======
 // نعرّف الـ Controllers المستخدمة ـ كل Use يوضح مسؤولية الكنترولر باختصار.
@@ -34,6 +35,20 @@ use App\Http\Controllers\Api\EarningController;     // عرض أرباح الس�
 use App\Http\Controllers\Api\RatingController;      // إضافة وعرض التقييمات الخاصة بكل رحلة (مرتبط بالـ order)
 use App\Http\Controllers\Api\SupportController;     // نظام التذاكر (Support tickets) - جديد
 use App\Http\Controllers\Api\AdminController;       // أدوات إدارة النظام (قوائم المستخدمين/الطلبات/تقارير) - جديد
+use App\Http\Controllers\ChatController;
+
+Route::post('/send-message', [ChatController::class, 'sendMessage']);
+Route::get('/test-broadcast', function () {
+    $order = [
+        'id' => 123,
+        'status' => 'pending',
+        'customer' => 'Ali'
+    ];
+    event(new OrderUpdated($order));
+    return 'Event sent!';
+});
+
+
 
 // =============================
 // AUTHENTICATION ROUTES

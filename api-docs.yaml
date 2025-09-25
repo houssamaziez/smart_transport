@@ -1,0 +1,423 @@
+openapi: 3.0.3
+info:
+  title: Smart Transport API
+  description: Laravel 11 Backend for Ride/Parcel app (Customer, Driver, Station, Admin).
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000/api
+    description: Local dev server
+
+tags:
+  - name: Auth
+  - name: Customer
+  - name: Driver
+  - name: Station
+  - name: Payments
+  - name: Earnings
+  - name: Support
+  - name: Admin
+  - name: Notifications
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+                role: { type: string, enum: [customer, driver, station] }
+                region: { type: string }
+      responses:
+        "201":
+          description: User registered successfully
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone: { type: string }
+                password: { type: string }
+      responses:
+        "200":
+          description: Login success, returns token
+
+  /auth/profile:
+    get:
+      tags: [Auth]
+      summary: Get authenticated user profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User profile
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Logged out successfully
+
+  /auth/change-password:
+    post:
+      tags: [Auth]
+      summary: Change password
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Password updated
+
+  /auth/update-profile:
+    post:
+      tags: [Auth]
+      summary: Update profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profile updated
+
+  /customer/orders:
+    get:
+      tags: [Customer]
+      summary: List customer orders
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of orders
+    post:
+      tags: [Customer]
+      summary: Create new order
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Order created
+
+  /customer/orders/{id}:
+    get:
+      tags: [Customer]
+      summary: Get customer order details
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema: { type: integer }
+          required: true
+      responses:
+        "200":
+          description: Order details
+
+  /customer/orders/{id}/cancel:
+    post:
+      tags: [Customer]
+      summary: Cancel order
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema: { type: integer }
+          required: true
+      responses:
+        "200":
+          description: Order cancelled
+
+  /customer/orders/{id}/delete:
+    delete:
+      tags: [Customer]
+      summary: Delete order
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema: { type: integer }
+          required: true
+      responses:
+        "200":
+          description: Order deleted
+
+  /customer/orders/{id}/rate:
+    post:
+      tags: [Customer]
+      summary: Rate driver
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Rating submitted
+
+  /driver/orders:
+    get:
+      tags: [Driver]
+      summary: List available orders (by region)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Available orders
+
+  /driver/orders/{id}/accept:
+    post:
+      tags: [Driver]
+      summary: Accept order
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema: { type: integer }
+          required: true
+      responses:
+        "200":
+          description: Order accepted
+
+  /driver/orders/{id}/status:
+    post:
+      tags: [Driver]
+      summary: Update order status
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Status updated
+
+  /driver/location:
+    post:
+      tags: [Driver]
+      summary: Update driver location
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Location updated
+
+  /driver/earnings:
+    get:
+      tags: [Driver]
+      summary: Get driver earnings
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Earnings summary
+
+  /driver/reviews:
+    get:
+      tags: [Driver]
+      summary: Get driver reviews
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of reviews
+
+  /station/orders:
+    get:
+      tags: [Station]
+      summary: List station orders
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Station orders
+
+  /station/orders/{id}/assign-driver:
+    post:
+      tags: [Station]
+      summary: Assign driver to order
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Driver assigned
+
+  /payments/record:
+    post:
+      tags: [Payments]
+      summary: Record payment
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Payment recorded
+
+  /payments/{id}/refund:
+    post:
+      tags: [Payments]
+      summary: Refund payment
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Payment refunded
+
+  /payments/history:
+    get:
+      tags: [Payments]
+      summary: Get payment history
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Payment history
+
+  /earnings:
+    get:
+      tags: [Earnings]
+      summary: Get user earnings
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Earnings list
+
+  /earnings/summary:
+    get:
+      tags: [Earnings]
+      summary: Get earnings summary
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Earnings summary
+
+  /support/tickets:
+    get:
+      tags: [Support]
+      summary: List support tickets
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Tickets list
+    post:
+      tags: [Support]
+      summary: Create support ticket
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Ticket created
+
+  /support/tickets/{id}:
+    get:
+      tags: [Support]
+      summary: Get ticket details
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema: { type: integer }
+          required: true
+      responses:
+        "200":
+          description: Ticket details
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: List users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Users list
+
+  /admin/users/{id}:
+    get:
+      tags: [Admin]
+      summary: Get user details
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User details
+
+  /admin/users/{id}/ban:
+    post:
+      tags: [Admin]
+      summary: Ban user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User banned
+
+  /admin/orders:
+    get:
+      tags: [Admin]
+      summary: List orders
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Orders list
+
+  /admin/payments:
+    get:
+      tags: [Admin]
+      summary: List payments
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Payments list
+
+  /admin/reports:
+    get:
+      tags: [Admin]
+      summary: Generate reports
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Reports data
+
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List user notifications
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Notifications list
+
+  /notifications/{id}/read:
+    post:
+      tags: [Notifications]
+      summary: Mark notification as read
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Notification marked as read
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
