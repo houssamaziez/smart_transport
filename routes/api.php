@@ -47,6 +47,7 @@ Route::get('/test-broadcast', function () {
     event(new OrderUpdated($order));
     return 'Event sent!';
 });
+Route::get('/chat', [ChatController::class, 'index']);
 
 
 

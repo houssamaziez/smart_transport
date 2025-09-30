@@ -48,24 +48,28 @@ class OrderCreated implements ShouldBroadcast
     /**
      * Get the data to broadcast.
      */
-    public function broadcastWith(): array
-    {
-        return [
-            'order' => [
-                'id' => $this->order->id,
-                'type' => $this->order->type,
-                'pickup_location' => $this->order->pickup_location,
-                'dropoff_location' => $this->order->dropoff_location,
-                'price' => $this->order->price,
-                'package_type' => $this->order->package_type,
-                'passenger_count' => $this->order->passenger_count,
-                'status' => $this->order->status,
-                'region' => $this->order->region,
-                'created_at' => $this->order->created_at,
-                'scheduled_at' => $this->order->scheduled_at,
-            ],
-            'message' => 'New order available in your region!',
-            'timestamp' => now()->toISOString(),
-        ];
-    }
+   public function broadcastWith(): array
+{
+    return [
+        'order' => [
+            'id' => $this->order->id,
+            'type' => $this->order->type,
+            'pickup_location' => $this->order->pickup_address,   // correct column
+            'dropoff_location' => $this->order->dropoff_address, // correct column
+            'price' => $this->order->price,
+            'parcel_description' => $this->order->parcel_description, // if parcel
+            'parcel_weight' => $this->order->parcel_weight,           // if parcel
+            'car_type' => $this->order->car_type,
+            'payment_method' => $this->order->payment_method,
+            'notes' => $this->order->notes,
+            'status' => $this->order->status,
+            'region' => $this->order->region,
+            'created_at' => $this->order->created_at,
+            'scheduled_at' => $this->order->scheduled_at,
+        ],
+        'message' => 'New order available in your region!',
+        'timestamp' => now()->toISOString(),
+    ];
+}
+
 }
