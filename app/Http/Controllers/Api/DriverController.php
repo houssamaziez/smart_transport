@@ -150,22 +150,29 @@ class DriverController extends Controller
             ->get();
 
         // إضافة معلومات إضافية للطرود
-        $parcelsWithDetails = $parcelOrders->map(function ($order) {
-            return [
-                'id' => $order->id,
-                'type' => $order->type,
-                'package_type' => $order->package_type,
-                'pickup_location' => $order->pickup_location,
-                'dropoff_location' => $order->dropoff_location,
-                'price' => $order->price,
-                'status' => $order->status,
-                'region' => $order->region,
-                'created_at' => $order->created_at,
-                'scheduled_at' => $order->scheduled_at,
-                'estimated_delivery_time' => $this->estimateDeliveryTime($order->package_type),
-                'delivery_priority' => $this->getDeliveryPriority($order->package_type)
-            ];
-        });
+       $parcelsWithDetails = $parcelOrders->map(function ($order) {
+    return [
+        'id' => $order->id,
+        'type' => $order->type,
+        // package_type مش موجود → ممكن تستعمل parcel_description أو parcel_weight
+        'package_type' => $order->parcel_description,
+
+        // استبدال location بـ address
+        'pickup_location' => $order->pickup_address,
+        'dropoff_location' => $order->dropoff_address,
+
+        'price' => $order->price,
+        'status' => $order->status,
+        'region' => $order->region,
+        'created_at' => $order->created_at,
+        'scheduled_at' => $order->scheduled_at,
+
+        // إذا عندك أعمدة فعلية estimated_delivery_time و delivery_priority رجعها مباشرة
+        'estimated_delivery_time' => $order->estimated_delivery_time ?? $this->estimateDeliveryTime($order->parcel_description),
+        'delivery_priority' => $order->delivery_priority ?? $this->getDeliveryPriority($order->parcel_description),
+    ];
+});
+
 
         return response()->json([
             'status' => true,

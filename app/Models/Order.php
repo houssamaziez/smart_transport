@@ -14,7 +14,8 @@ class Order extends Model
     'dropoff_address','dropoff_lat','dropoff_lng',
     'parcel_description','parcel_weight','distance','duration','price',
     'payment_status','status','meta','region',
-    'car_type','payment_method','notes','scheduled_at'
+    'car_type','payment_method','notes','scheduled_at',   'package_type','pickup_location','dropoff_location'
+
 ];
 
 
